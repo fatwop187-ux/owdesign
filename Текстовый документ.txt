@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Работа 1",
+    "image": "images/work1.jpg"
+  },
+  {
+    "title": "Работа 2",
+    "image": "images/work2.jpg"
+  }
+]

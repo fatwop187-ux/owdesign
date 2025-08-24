@@ -1,0 +1,88 @@
+/* Стиль для блока с изображением */
+.hero__wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+/* Анимация для картинки */
+.hero-image {
+  width: 500px;
+  height: auto;
+  border-radius: 10px;
+  animation: float 3s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* Стиль для сообщений */
+.message {
+  position: absolute;
+  padding: 15px 30px;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  backdrop-filter: blur(10px); /* Эффект стекла */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, rgba(139,92,246,.2), rgba(34,211,238,.2)); /* Градиентный фон */
+  animation: fadeIn 1s ease-in-out forwards;
+}
+
+/* Сообщение слева сверху */
+.message-left-top {
+  top: 20px;
+  left: 20px;
+  transform: translate(-20px, -20px);
+  font-size: 18px;
+  padding: 10px 20px;
+}
+
+/* Сообщение справа снизу */
+.message-right-bottom {
+  bottom: 20px;
+  right: 20px;
+  transform: translate(20px, 20px);
+  font-size: 18px;
+  padding: 10px 20px;
+}
+
+/* Выделение "20%" */
+.message span {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--primary);
+  background-color: rgba(255,255,255,0.7);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+/* Анимация для появления сообщений */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}

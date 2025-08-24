@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ownership Design — Dark дизайн-студия</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <!-- Здесь будет весь контент страницы -->
+</body>
+</html>
+
+  <!-- SEO -->
+  <meta name="description" content="Ownership Design — дизайн-студия. Делаем логотипы, оформление магазинов, баннеры, анимацию и веб-дизайн. Более 800 выполненных работ и 400 отзывов.">
+
+  <!-- Open Graph для соцсетей -->
+  <meta property="og:title" content="Ownership Design — Dark дизайн-студия">
+  <meta property="og:description" content="Логотипы, баннеры, анимация и веб-дизайн. Более 800 работ и 400 отзывов.">
+  <meta property="og:image" content="https://example.com/preview.jpg">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://example.com">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ownership Design — Dark дизайн-студия">
+  <meta name="twitter:description" content="Логотипы, баннеры, анимация и веб-дизайн. Более 800 работ и 400 отзывов.">
+  <meta name="twitter:image" content="https://example.com/preview.jpg">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://example.com">
+
+  <!-- Фонты -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+
+
+  <style>
+    :root{
+      --bg:#0a0b0f;
+      --panel:#0f1117;
+      --ink:#e5e7eb;
+      --muted:#9aa0a6;
+      --primary:#8b5cf6; /* фиолет */
+      --accent:#22d3ee;  /* бирюзовый */
+      --acid:#22ff88;    /* неон зелёный */
+      --grid: rgba(255,255,255,0.04);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{ scroll-behavior:smooth; }
+
+    body{
+      zoom: 1.1;
+      margin:0;
+      /* Обновлённый фон: плавнее, без пересветов */
+      background:
+        radial-gradient(900px 600px at 50% -8%, rgba(139,92,246,.20), transparent 65%),   /* верхний мягче */
+        radial-gradient(1100px 700px at 15% 110%, rgba(139,92,246,.18), transparent 65%), /* низ слева */
+        radial-gradient(1000px 650px at 85% 110%, rgba(34,211,238,.16), transparent 65%), /* низ справа */
+        radial-gradient(900px 700px at 50% 220%, rgba(34,255,136,.12), transparent 65%),  /* центральный ниже */
+        var(--bg);
+      color:var(--ink);
+      font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow-x:hidden;
+      cursor:auto;
+      background-repeat:no-repeat;
+      background-attachment:fixed; /* чтобы фон красиво держался при скролле */
+    }
+    /* Хедер */
+    .nav{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(10,11,15,.8), rgba(10,11,15,.4));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .nav__row{
+      max-width:1200px;margin:0 auto; /* исправил 'авто' -> 'auto' */
+      padding:14px 20px; display:flex; gap:18px; align-items:center; justify-content:flex-end;
+    }
+    .nav__spacer{flex:1}
+    .chip{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 14px; border-radius:999px;
+      font-weight:600; font-size:14px; letter-spacing:.2px;
+      color:#0b0c10; background:linear-gradient(135deg, var(--acid), #b7ff6a);
+      text-decoration:none; transition: transform .18s ease;
+    }
+    .chip:hover{ transform:translateY(-1px) scale(1.02);}
+    .ghost{
+      color:var(--ink); background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .ghost:hover{ transform:translateY(-1px) }
+
+    /* HERO */
+    .hero{
+      position:relative; overflow:hidden;
+      border-bottom:none; /* убрал линию под героем */
+    }
+    .hero__wrap{
+      max-width:1200px;margin:0 auto; padding:88px 20px 72px;
+       gap:28px; align-items:center;
+    }
+    .brand{
+      font-family:"Orbitron", system-ui;
+      font-weight:800; letter-spacing:.5px; line-height:1.05;
+      font-size: clamp(44px, 7vw, 84px);
+      color:#fff; margin:0 0 16px;
+      text-shadow: 0 0 18px rgba(139,92,246,.25); /* без градиента на тексте */
+    }
+    .kicker{
+      display:inline-block; margin-bottom:14px;
+      font-weight:700; font-size:13px; letter-spacing:.3em; /* исправил '.3ем' -> '.3em' */
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .lead{
+      margin:0 0 26px; color:#cbd5e1; font-size: clamp(16px, 2.2vw, 20px); line-height:1.6;
+    }
+    .cta-row{ display:flex; gap:14px; flex-wrap:wrap }
+    .btn{
+      position:relative; overflow:hidden;
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:14px 18px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
+      font-weight:700; text-decoration:none; color:#0c0f13;
+      background:linear-gradient(135deg, var(--primary), #6ee7ff);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .btn span{ position:relative; z-index:2 }
+    .btn::before{
+      content:""; position:absolute; inset:-120% -20%;
+      background: radial-gradient(120px 140px at var(--x,10%) var(--y,50%), rgba(255,255,255,.55), transparent 60%);
+      opacity:.0; transition:opacity .2s ease, transform .2s ease;
+    }
+    .btn:hover{ transform:translateY(-1px) scale(1.01); box-shadow:0 10px 30px rgba(110,231,255,.18) }
+    .btn:hover::before{ opacity:.7; }
+
+    .btn--ghost{
+      color:#e5e7eb; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    }
+    .btn--ghost:hover{ box-shadow:none }
+
+    /* Персонаж-силуэт */
+    .hoodie{
+      position:relative; aspect-ratio:1 / 1;
+      border-radius:20px; background:
+        radial-gradient(120px 120px at 30% 30%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .hoodie svg{ position:absolute; inset:0; width:100%; height:100%; filter: drop-shadow(0 0 20px rgba(139,92,246,.3)); opacity:.95 }
+    .scan{
+      position:absolute; left:-20%; width:140%; height:120px; top:-120px;
+      background: linear-gradient(180deg, rgba(34,255,136,.0), rgba(34,255,136,.12), rgba(34,255,136,.0));
+      filter: blur(4px);
+      animation: scan 6s linear infinite;
+    }
+    @keyframes scan{
+      0%{ transform:translateY(0) rotate(1.2deg) }
+      100%{ transform:translateY(120%) rotate(1.2deg) }
+    }
+
+    /* СТАТИСТИКА */
+    .stats{
+      max-width:1200px;margin:24px auto 8px; padding:0 20px;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    }
+    .stat{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:16px; padding:18px 18px 16px;
+    }
+    .stat b{
+      display:block; font-family:"Orbitron"; font-size:28px; letter-spacing:.5px;
+      color:#fff; margin-bottom:6px;
+      text-shadow:0 0 12px rgba(34,255,136,.15);
+    }
+    .stat small{ color:var(--muted) }
+
+    /* УСЛУГИ */
+    .section{ max-width:1200px; margin:56px auto; padding:0 20px }
+    .h2{
+      font-family:"Orbitron"; font-weight:800; letter-spacing:.4px;
+      font-size: clamp(22px, 3.2vw, 30px); margin:0 0 18px;
+    }
+    .sub{ color:var(--muted); margin:0 0 22px }
+    .grid{
+      display:grid; gap:16px;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+    }
+    @media (max-width:1100px){ .grid{ grid-template-columns: repeat(3,1fr);} }
+    @media (max-width:640px){ .grid{ grid-template-columns: repeat(2,1fr);} }
+
+    .card{
+      position:relative; overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px; padding:18px; min-height:120px;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+      will-change: transform;
+    }
+    .card:hover{ transform:translateY(-4px) scale(1.02); background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)); }
+    .card svg{ width:28px;height:28px; opacity:.9 }
+    .card h4{ margin:10px 0 4px; font-size:16px }
+    .card p{ margin:0; color:#b7bcc4; font-size:13px }
+
+    /* ПОРТФОЛИО */
+    .portfolio{
+      display:grid; gap:16px;
+      grid-template-columns:repeat(3,1fr);
+    }
+    @media (max-width:980px){ .portfolio{ grid-template-columns:repeat(2,1fr) } }
+    @media (max-width:600px){ .portfolio{ grid-template-columns:1fr } }
+
+    .work{
+      position:relative; overflow:hidden; border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      transition: transform .25s ease;
+    }
+    .work img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: top;
+  aspect-ratio: 16 / 10;
+  opacity: .95;
+  transition: transform .35s ease, opacity .35s ease;
+}
+
+.work:hover img {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+    /* ФУТЕР */
+    .footer{
+      margin-top:70px; border-top:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    }
+    .footer__in{
+      max-width:1200px; margin:0 auto; padding:28px 20px 40px;
+      display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;
+    }
+    .links{ display:flex; gap:16px; flex-wrap:wrap }
+    .footer-link{ color:#d1d5db; text-decoration:none; padding:8px 12px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
+    .footer-link:hover{ transform:translateY(-1px) }
+
+    /* Scroll-reveal */
+    .reveal{ opacity:0; transform: translateY(16px); transition: all .6s ease }
+    .reveal--visible{ opacity:1; transform: translateY(0) }
+  </style>
+</head>
+<body>
+  <!-- Хедер -->
+  <header class="nav">
+    <div class="nav__row">
+      <div class="nav__spacer"></div>
+      <a class="ghost chip" href="https://t.me/OwnershipReviews" target="_blank" rel="noopener">📝 Отзывы</a>
+      <a class="ghost chip" href="https://t.me/OwnershipForum" target="_blank" rel="noopener">💬 Форумы</a>
+      <a class="chip" href="https://t.me/Ownership187" target="_blank" rel="noopener">✈️ Telegram</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+  <div class="hero__wrap">
+    <div>
+      <span class="kicker">Design Studio · Night / Digital</span>
+      <h1 class="brand">Ownership<br/>Design</h1>
+      <p class="lead">Хочешь обновить дизайн своего сервиса или магазина?<br/> 
+        <b>Ownership Design</b> — поможет тебе!</p>
+      <div class="cta-row">
+        <a class="btn" href="https://t.me/Ownership187" target="_blank" rel="noopener"><span>Заказать в Telegram</span></a>
+        <a class="btn btn--ghost" href="#portfolio"><span>Смотреть портфолио</span></a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="personazh.png" alt="Наш персонаж">
+      
+      <!-- Сообщение слева сверху -->
+      <div class="message message-left-top">
+  Для вас скидка в <span>20%</span>
+</div>
+
+      
+      <!-- Сообщение справа снизу -->
+      <div class="message message-right-bottom">Для вашего сервиса</div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+    <!-- статистика сразу под героем -->
+    <section class="stats">
+  <div class="stat">
+    <b data-target="400">0</b>+
+    <span>положительных отзывов</span>
+  </div>
+  <div class="stat">
+    <b data-target="800">0</b>+
+    <span>выполненных работ</span>
+  </div>
+  <div class="stat">
+    <b data-target="10">0</b>+
+    <span>лет опыта</span>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const counters = document.querySelectorAll(".stat b");
+
+  counters.forEach(counter => {
+    counter.innerText = "0";
+    const target = parseInt(counter.getAttribute("data-target"), 10);
+    const duration = 2000; // 2 секунды
+    const stepTime = 20;   // шаг (мс)
+    const steps = duration / stepTime;
+    const increment = target / steps;
+
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        counter.innerText = target;
+        clearInterval(timer);
+      } else {
+        counter.innerText = Math.floor(current);
+      }
+    }, stepTime);
+  });
+});
+</script>
+
+
+  <!-- УСЛУГИ -->
+  <section class="section">
+    <h2 class="h2">Услуги</h2>
+    <p class="sub">Создаём узнаваемый брендинг и оформление для магазинов, сообществ и сервисов.</p>
+    <div class="grid reveal" id="services">
+      <!-- Карточка -->
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l3 5 6 .9-4.3 4.2 1 6L12 15l-5.7 3 1-6L3 7.9 9 7l3-5z" stroke="currentColor" opacity=".8"/></svg>
+        <h4>Аватарка</h4>
+        <p>Выразительный образ для профиля и бренда.</p>
+      </div>
+
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" opacity=".8"/><path d="M8 12h8M12 8v8" stroke="currentColor"/></svg>
+        <h4>Логотип</h4>
+        <p>Айдентика, которая запоминается.</p>
+      </div>
+
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor"/><path d="M7 10h10M7 14h6" stroke="currentColor"/></svg>
+        <h4>Оформление магазина</h4>
+        <p>Витрина, баннеры, карточки товара.</p>
+      </div>
+
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="7" width="16" height="10" rx="2" stroke="currentColor"/><path d="M6 10h8" stroke="currentColor"/></svg>
+        <h4>Баннер</h4>
+        <p>Креативы для рекламы и сообщества.</p>
+      </div>
+
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h10M4 18h7" stroke="currentColor"/><circle cx="18" cy="12" r="3" stroke="currentColor"/></svg>
+        <h4>Анимация</h4>
+        <p>Движущаяся графика, интро, прелоадеры.</p>
+      </div>
+
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor"/><path d="M7 8h10M7 12h7M7 16h5" stroke="currentColor"/></svg>
+        <h4>Веб-дизайн</h4>
+        <p>Современные лендинги и UI-системы.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПОРТФОЛИО -->
+  <section class="section" id="portfolio">
+    <h2 class="h2">Портфолио</h2>
+
+    <div class="portfolio reveal" id="portfolioGrid">
+      <a class="work" href="#" aria-label="work 1">
+        <img src="https://images.unsplash.com/photo-1523881371635-7448845a9e53?q=80&w=1200&auto=format&fit=crop" alt="work1"/>
+      </a>
+      <a class="work" href="#" aria-label="work 2">
+        <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?q=80&w=1200&auto=format&fit=crop" alt="work2"/>
+      </a>
+      <a class="work" href="#" aria-label="work 3">
+        <img src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?q=80&w=1200&auto=format&fit=crop" alt="work3"/>
+      </a>
+      <a class="work" href="#" aria-label="work 4">
+        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop" alt="work4"/>
+      </a>
+      <a class="work" href="#" aria-label="work 5">
+        <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop" alt="work5"/>
+      </a>
+      <a class="work" href="#" aria-label="work 6">
+        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200&auto=format&fit=crop" alt="work6"/>
+      </a>
+    </div>
+
+    <!-- КНОПКУ ПОД ПОРТФОЛИО УДАЛИЛ -->
+  </section>
+
+  <!-- ФУТЕР -->
+  <footer class="footer">
+    <div class="footer__in">
+      <div class="links">
+        <!-- Удалено: <a class="footer-link" href="#portfolio">📂 Портфолио</a> -->
+        <a class="footer-link" href="https://t.me/OwnershipReviews" target="_blank" rel="noopener">📝 Отзывы</a>
+        <a class="footer-link" href="https://t.me/OwnershipForum" target="_blank" rel="noopener">💬 Форумы</a>
+        <a class="footer-link" href="https://t.me/Ownership187" target="_blank" rel="noopener">✈️ Telegram</a>
+      </div>
+      <div style="color:var(--muted)">© Ownership Design</div>
+    </div>
+  </footer>
+
+  <script>
+    // Блик внутри кнопки — позиция от курсора
+    document.querySelectorAll('.btn').forEach(b=>{
+      b.addEventListener('mousemove', e=>{
+        const r = b.getBoundingClientRect();
+        b.style.setProperty('--x', ((e.clientX - r.left)/r.width*100)+'%');
+        b.style.setProperty('--y', ((e.clientY - r.top)/r.height*100)+'%');
+      });
+    });
+
+    // Scroll-reveal
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){ en.target.classList.add('reveal--visible'); io.unobserve(en.target); }
+      })
+    },{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    // Защита: правый клик и F12
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12') { e.preventDefault(); }
+    });
+  </script>
+</body>
+</html>
+<section class="portfolio-section">
+  <div class="portfolio reveal" id="portfolioGrid"></div>
+</section>
+
+<script>
+  async function loadPortfolio() {
+    try {
+      const grid = document.getElementById('portfolioGrid');
+
+      // Загружаем работы из localStorage
+      let works = JSON.parse(localStorage.getItem("portfolioWorks")) || [];
+
+      // Если хочешь дефолтные работы — храни их в portfolio.json
+      try {
+        const response = await fetch('portfolio.json');
+        if (response.ok) {
+          const jsonWorks = await response.json();
+          works = jsonWorks.concat(works); // сначала дефолтные, потом добавленные
+        }
+      } catch(e) {
+        console.warn("portfolio.json не найден, грузим только localStorage");
+      }
+
+      // Рендер
+      grid.innerHTML = '';
+      works.forEach(work => {
+        const item = document.createElement('a');
+        item.classList.add('work');
+        item.href = work.link || "#";
+        item.target = "_blank";
+        item.innerHTML = `
+          <img src="${work.image}" alt="${work.title}">
+        `;
+        grid.appendChild(item);
+      });
+    } catch (err) {
+      console.error("Ошибка загрузки портфолио:", err);
+    }
+  }
+
+  loadPortfolio();
+</script>
+<!-- Модальное окно -->
+<div id="lightbox" style="display:none;">
+  <span id="closeLightbox">&times;</span>
+  <img id="lightboxImg" src="" alt="">
+  <div id="lightboxCaption"></div>
+  <div id="lightboxCounter"></div>
+  <button id="prevBtn">⟨</button>
+  <button id="nextBtn">⟩</button>
+</div>
+
+<style>
+  #lightbox {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+  }
+  #lightbox img {
+    max-width: 90%;
+    max-height: 80%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+  }
+  #closeLightbox {
+    position: absolute;
+    top: 20px; right: 30px;
+    font-size: 40px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+  }
+  #lightboxCaption {
+    color: #ccc;
+    font-size: 18px;
+    margin-top: 5px;
+    text-align: center;
+  }
+  #lightboxCounter {
+    color: #888;
+    font-size: 14px;
+    margin-top: 3px;
+  }
+  #prevBtn, #nextBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  #prevBtn { left: 30px; }
+  #nextBtn { right: 30px; }
+</style>
+
+<script>
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
+  const lightboxCaption = document.getElementById("lightboxCaption");
+  const lightboxCounter = document.getElementById("lightboxCounter");
+  const closeBtn = document.getElementById("closeLightbox");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  let portfolioItems = [];
+  let currentIndex = 0;
+
+  function initLightbox() {
+    portfolioItems = Array.from(document.querySelectorAll("#portfolioGrid .work img"));
+
+    portfolioItems.forEach((img, index) => {
+      img.addEventListener("click", (e) => {
+        e.preventDefault(); 
+        openLightbox(index);
+      });
+    });
+
+    // закрытие по клику на фон
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
+  }
+
+  function openLightbox(index) {
+    currentIndex = index;
+    const img = portfolioItems[index];
+    lightboxImg.src = img.src;
+    lightboxCaption.textContent = img.alt || "";
+    lightboxCounter.textContent = (index + 1) + " из " + portfolioItems.length;
+    lightbox.style.display = "flex";
+  }
+
+  function closeLightbox() {
+    lightbox.style.display = "none";
+  }
+
+  function showNext(step) {
+    currentIndex = (currentIndex + step + portfolioItems.length) % portfolioItems.length;
+    openLightbox(currentIndex);
+  }
+
+  closeBtn.addEventListener("click", closeLightbox);
+  prevBtn.addEventListener("click", () => showNext(-1));
+  nextBtn.addEventListener("click", () => showNext(1));
+  window.addEventListener("keydown", (e) => {
+    if (lightbox.style.display === "flex") {
+      if (e.key === "ArrowRight") showNext(1);
+      if (e.key === "ArrowLeft") showNext(-1);
+      if (e.key === "Escape") closeLightbox();
+    }
+  });
+
+  window.addEventListener("load", () => {
+    initLightbox();
+  });
+</script>

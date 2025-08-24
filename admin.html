@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Портфолио</title>
+  <style>
+    /* Стиль для страницы, пока не введен правильный пароль */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #141726, #1c1f2b);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .password-modal {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+    }
+
+    .password-modal-content {
+      background: #222637;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    .password-modal input {
+      padding: 14px;
+      border-radius: 12px;
+      background: #2b3142;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .password-modal button {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .password-modal button:hover {
+      background: #43a047;
+    }
+
+    /* Основной стиль для админки */
+    .admin-wrapper {
+      display: none; /* Скрыть админку до ввода правильного пароля */
+      width: 100%;
+      max-width: 1000px;
+      padding: 40px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+
+    .admin-card {
+      background: #222637;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      margin-bottom: 40px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input, textarea {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #2b3142;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      background: #353c52;
+    }
+
+    button {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn {
+      background: #4CAF50;
+      color: white;
+    }
+    .add-btn:hover {
+      background: #43a047;
+    }
+
+    .clear-btn {
+      background: #e74c3c;
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .clear-btn:hover {
+      background: #c0392b;
+    }
+
+    /* Превью */
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      margin-top: 30px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .portfolio-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .portfolio-item {
+      background: #2b3142;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .portfolio-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+    }
+
+    .portfolio-item img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .portfolio-item h3 {
+      font-size: 16px;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .delete-btn, .edit-btn {
+      position: absolute;
+      top: 10px;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .delete-btn {
+      right: 10px;
+      background: #e74c3c;
+      color: white;
+    }
+    .delete-btn:hover { background: #c0392b; }
+
+    .edit-btn {
+      right: 60px;
+      background: #3498db;
+      color: white;
+    }
+    .edit-btn:hover { background: #2980b9; }
+
+    .preview-img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Модальное окно для ввода пароля -->
+  <div class="password-modal" id="passwordModal">
+    <div class="password-modal-content">
+      <h2>Введите пароль для доступа к админке</h2>
+      <input type="password" id="passwordInput" placeholder="Введите пароль">
+      <button onclick="checkPassword()">Войти</button>
+    </div>
+  </div>
+
+  <!-- Основная админка скрыта, пока не введён правильный пароль -->
+  <div class="admin-wrapper" id="adminContent">
+    <h1>Добавить портфолио</h1>
+    <div class="admin-card">
+      <form id="portfolioForm">
+        <input type="text" id="title" placeholder="Название проекта" required>
+        <input type="text" id="image" placeholder="Ссылка на картинку">
+        <input type="file" id="fileInput" accept="image/*">
+        <img id="previewImage" class="preview-img" style="display:none;">
+        <button type="submit" class="add-btn">Сохранить работу</button>
+      </form>
+
+      <button class="clear-btn" id="clearAll">Очистить все работы</button>
+    </div>
+
+    <h2>Предпросмотр</h2>
+    <div id="portfolioPreview" class="portfolio-preview"></div>
+  </div>
+
+  <script>
+    const correctPassword = "94";  // Установлен пароль 94
+
+    function checkPassword() {
+      const passwordInput = document.getElementById("passwordInput");
+      const password = passwordInput.value;
+
+      if (password === correctPassword) {
+        document.getElementById("passwordModal").style.display = "none";
+        document.getElementById("adminContent").style.display = "block";
+      } else {
+        alert("Неверный пароль. Попробуйте снова.");
+      }
+    }
+
+    // Ваши старые скрипты для обработки работ
+    const form = document.getElementById("portfolioForm");
+    const preview = document.getElementById("portfolioPreview");
+    const clearBtn = document.getElementById("clearAll");
+    const fileInput = document.getElementById("fileInput");
+    const imageInput = document.getElementById("image");
+    const previewImage = document.getElementById("previewImage");
+
+    let works = JSON.parse(localStorage.getItem("portfolioWorks")) || [];
+    let editIndex = null;
+
+    function saveWorks() {
+      localStorage.setItem("portfolioWorks", JSON.stringify(works));
+    }
+
+    function renderWorks() {
+      preview.innerHTML = "";
+      works.forEach((work, index) => {
+        const item = document.createElement("div");
+        item.classList.add("portfolio-item");
+        item.innerHTML = `
+          <button class="edit-btn" data-index="${index}">✏️</button>
+          <button class="delete-btn" data-index="${index}">🗑</button>
+          <img src="${work.image}" alt="${work.title}">
+          <h3>${work.title}</h3>
+        `;
+        preview.appendChild(item);
+      });
+
+      document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const index = btn.getAttribute("data-index");
+          works.splice(index, 1);
+          saveWorks();
+          renderWorks();
+        });
+      });
+
+      document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const index = btn.getAttribute("data-index");
+          const work = works[index];
+          document.getElementById("title").value = work.title;
+          document.getElementById("image").value = work.image.startsWith("data:") ? "" : work.image;
+          previewImage.src = work.image;
+          previewImage.style.display = "block";
+          editIndex = index;
+        });
+      });
+    }
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImage.src = e.target.result;
+          previewImage.style.display = "block";
+          imageInput.value = "";
+          imageInput.dataset.fileData = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    imageInput.addEventListener("input", () => {
+      if (imageInput.value) {
+        previewImage.src = imageInput.value;
+        previewImage.style.display = "block";
+        imageInput.removeAttribute("data-file-data");
+      }
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const imageUrl = imageInput.dataset.fileData || imageInput.value || previewImage.src;
+
+      if (!imageUrl) {
+        alert("Добавьте картинку!");
+        return;
+      }
+
+      if (editIndex !== null) {
+        works[editIndex] = { title, image: imageUrl };
+        editIndex = null;
+      } else {
+        works.push({ title, image: imageUrl });
+      }
+
+      saveWorks();
+      renderWorks();
+      form.reset();
+      previewImage.style.display = "none";
+      imageInput.removeAttribute("data-file-data");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      if (confirm("Очистить все работы?")) {
+        works = [];
+        saveWorks();
+        renderWorks();
+      }
+    });
+
+    renderWorks();
+  </script>
+
+</body>
+</html>
